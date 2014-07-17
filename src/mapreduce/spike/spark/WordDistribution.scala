@@ -73,8 +73,8 @@ class WordDistribution extends SparkApp {
 
   // This is your typical word count, can run on really large datasets
   // across multiple nodes
-  // Spark understands we want to group by key and get all values together as a sequence against that key.
-  // So, it doesn't bother to duplicate the key information as part of the value list.
+  // Spark understands we want to group by key and gets all values together as a sequence against that key.
+  // So, it doesn't bother to duplicate the key information as part of the value list.(compared to regular groupBy primitives)
   // Also, as of Spark 0.9.*, groupBy operations return a RDD[K, Seq[V]]
   // This is a problem for large datasets, because, the Seq[V] is an in-memory structure, 
   // so it can't hold arbitrarily large sets.
@@ -90,7 +90,9 @@ class WordDistribution extends SparkApp {
 
   // Collecting the freq count as an in-memory map.
   // The transformations that's done to get freqCounts uses a cached version of the previous
-  // transformation resulting in words.
+  // transformation resulting in words. 
+  // To get top-k using traditional MR jobs needs a separate post-processing step or 
+  // some other whacky approach that brings all data to one node..
   val collectedResult: Array[(String, Int)] = freqCount.top(10)(freqOrdering)
   println(s"Collected Result: ${collectedResult.length}")
   val outputLines = collectedResult.mkString("\n")
