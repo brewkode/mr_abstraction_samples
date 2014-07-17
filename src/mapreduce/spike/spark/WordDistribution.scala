@@ -62,21 +62,27 @@ class WordDistribution extends SparkApp {
     .map(_.trim)
     .cache() // execute this transformation only once and cache it for future re-use starting here.
 
-  // This is when the previous transformations are actually 'realized'.
+  // This is when the previous transformation is actually 'realized'.
   // Either during a collect() or save(), spark constructs a DAG and really
   // starts to executes your code.
   // Finally, we would've liked a Set[String] here to be more explicit
-  // that we are dealing with distinct elements. but, because the collect API is generic,
+  // that we are dealing with distinct elements. But, because the collect API is generic,
   // we can't have it that way.
   val distinctWords: Array[String] = words.distinct().collect()
   println(s"Number of Distinct words: ${distinctWords.length}")
 
-  // This is your typical word count. But, can run on really large datasets
+  // This is your typical word count, can run on really large datasets
   // across multiple nodes
+  // Spark understands we want to group by key and get all values together as a sequence against that key.
+  // So, it doesn't bother to duplicate the key information as part of the value list.
+  // Also, as of Spark 0.9.*, groupBy operations return a RDD[K, Seq[V]]
+  // This is a problem for large datasets, because, the Seq[V] is an in-memory structure, 
+  // so it can't hold arbitrarily large sets.
+  // This is different from the traditional hadoop's API, where the reducer gets a key and an Iterable of values, 
+  // which allows Hadoop's reducers to process really large value streams. 
   val freqCount: RDD[(String, Int)] = words.map(word => (word, 1))
     .groupByKey()
     .map(kv => (kv._1, kv._2.sum))
-
 
   implicit val freqOrdering: Ordering[(String, Int)] = {
     Ordering.by{ t: (String, Int) => t._2 }
