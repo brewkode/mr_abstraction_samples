@@ -15,6 +15,7 @@ class WordDistributionJob(args: Args) extends Job(args) {
   .filter(! shortWord)
   .map('word -> 'count)(1) // Creates a count field for every record(containing only the word so far).
   .groupBy('word)(_.sum('count, 'frequency)) // this is beautiful, it does a group by along with doing a map-side aggregation.
+  .groupAll(_.sortBy('frequency).reverse)
   .project('word, 'frequency)
   .write(Tsv(output, ('word, 'frequency)))
 

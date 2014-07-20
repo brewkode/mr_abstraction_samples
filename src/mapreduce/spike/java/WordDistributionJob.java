@@ -63,6 +63,10 @@ public class WordDistributionJob extends Configured implements Tool {
         }
     }
 
+    public static void main(String[] args) throws Exception {
+        new WordDistributionJob().run(args);
+    }
+
     public static class WordDistributionReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
         @Override
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
@@ -74,7 +78,4 @@ public class WordDistributionJob extends Configured implements Tool {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        new WordDistributionJob().run(args);
-    }
 }
