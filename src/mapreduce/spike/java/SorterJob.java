@@ -6,6 +6,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -21,7 +22,7 @@ public class SorterJob  extends Configured implements Tool {
 
         job.setMapSpeculativeExecution(false);
         job.setMapperClass(SorterJobMapper.class);
-        job.setNumReduceTasks(0);
+        job.setReducerClass(SorterJobReducer.class);
 
         job.setInputFormatClass(TextInputFormat.class);
         TextInputFormat.setInputPaths(job, inPath);
@@ -46,6 +47,15 @@ public class SorterJob  extends Configured implements Tool {
         @Override
         protected void map(Text key, IntWritable value, Context context) throws IOException, InterruptedException {
             context.write(value, key);
+        }
+    }
+
+    public static class SorterJobReducer extends Reducer<IntWritable, Text, Text, IntWritable> {
+        @Override
+        protected void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            for (Text value : values) {
+                context.write(value, key);
+            }
         }
     }
 }
