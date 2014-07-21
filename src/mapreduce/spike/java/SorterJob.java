@@ -23,6 +23,7 @@ public class SorterJob  extends Configured implements Tool {
         job.setMapSpeculativeExecution(false);
         job.setMapperClass(SorterJobMapper.class);
         job.setReducerClass(SorterJobReducer.class);
+        job.setNumReduceTasks(1);
 
         job.setInputFormatClass(TextInputFormat.class);
         TextInputFormat.setInputPaths(job, inPath);
